@@ -4,7 +4,7 @@
 
 ## Play
 
-**Online:** https://dishadesign1503-lab.github.io/the-house-outlives-its-creator/ (best on a phone).
+**Online:** https://dishadesign1503-lab.github.io/The-House-Outlives-Its-Creator/ (best on a phone).
 
 **On your own computer** (needs [Node.js](https://nodejs.org/) 20 or newer):
 
