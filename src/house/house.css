@@ -711,28 +711,6 @@ h3 {
   }
 }
 
-.hs-hypno-type {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.hs-hypno-type input {
-  flex: 1;
-  min-width: 0;
-  font: inherit;
-  font-size: 16px; /* no zoom on focus in iOS */
-  color: var(--ink);
-  background: transparent;
-  border: 1px solid var(--line);
-  padding: 0.4rem 0.6rem;
-  user-select: text;
-  -webkit-user-select: text;
-}
-
-.hs-hypno-type input:focus-visible {
-  outline: 1px solid var(--blue);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .hs-rec-dot {
     animation: none;
@@ -879,16 +857,6 @@ h3 {
   margin: 0;
   font-size: 0.75rem;
   color: var(--dim);
-}
-
-.hs-hypno-type {
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.hs-row-tight {
-  display: flex;
-  gap: 0.5rem;
 }
 
 .hs-warn {
@@ -1057,6 +1025,85 @@ h3 {
   .hs-dream-banner p,
   .hs-dream-banner p::before,
   .hs-dream-banner p::after {
+    animation: none;
+  }
+}
+
+/* THE WARNING after Start: typed letter by letter on near-black, then a fade into the game */
+.hs-disclaimer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 2rem 1.25rem;
+  background: #050506;
+  cursor: pointer;
+  animation: hs-warn-in 1.2s ease;
+  transition: opacity 0.9s ease;
+}
+
+@keyframes hs-warn-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.hs-disclaimer.leaving {
+  opacity: 0;
+}
+
+.hs-disclaimer-text {
+  max-width: 30rem;
+  min-height: 9em;
+  margin: 0;
+  font-size: clamp(1rem, 4.2vw, 1.25rem);
+  line-height: 1.7;
+  letter-spacing: 0.02em;
+  white-space: pre-line;
+  color: var(--ink);
+  text-shadow: 0 0 12px rgba(255, 91, 58, 0.18);
+}
+
+.hs-disclaimer-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.1em;
+  margin-left: 0.1em;
+  vertical-align: -0.15em;
+  background: var(--ink);
+  opacity: 0.8;
+}
+
+.hs-disclaimer-caret.idle {
+  animation: hs-caret 1.1s steps(1) infinite;
+}
+
+@keyframes hs-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.hs-disclaimer-skip {
+  margin: 0;
+  letter-spacing: 0.08em;
+}
+
+.hs-disclaimer-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-disclaimer,
+  .hs-disclaimer-caret.idle {
     animation: none;
   }
 }

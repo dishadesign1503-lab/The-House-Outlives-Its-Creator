@@ -11,11 +11,12 @@ import SettingsPanel, { Slider, Toggle } from './ui/SettingsPanel.jsx'
 import Calibration from './ui/Calibration.jsx'
 import Inspector from './ui/Inspector.jsx'
 import HypnoControl from './ui/HypnoControl.jsx'
+import Disclaimer from './ui/Disclaimer.jsx'
 import { HypnoListener } from './voice/listener.js'
 import './house.css'
 
 // THE HOUSE OUTLIVES ITS CREATOR — screens (the UI manager).
-// title → (how to play | sensor settings) → calibration → stage card → game ⇄ pause → … → ending
+// title → (how to play | sensor settings) → [warning, after Start] → calibration → stage card → game ⇄ pause → … → ending
 
 const SOURCE_LABEL = { tilt: 'TILT', keys: 'KEYS · fallback', touch: 'TOUCH · fallback', none: 'NO INPUT' }
 
@@ -26,7 +27,7 @@ export default function HouseApp() {
   )
   const [settings, setSettings] = useState(loadSettings)
   const [progress, setProgress] = useState(loadProgress)
-  const [screen, setScreen] = useState('title') // title | how | settings | calibrate | game
+  const [screen, setScreen] = useState('title') // title | how | settings | warning | calibrate | game
   const [startStage, setStartStage] = useState(0)
   const [runId, setRunId] = useState(0)
 
@@ -55,13 +56,13 @@ export default function HouseApp() {
     [services],
   )
 
-  const begin = async (stage) => {
+  const begin = async (stage, warn = false) => {
     // inside the tap: the only moment iOS allows the motion permission and audio to start
     services.audio.init()
     services.audio.setMuted(!settings.sound)
     if (services.sensors.status !== 'active') services.sensors.request()
     setStartStage(stage)
-    setScreen('calibrate')
+    setScreen(warn ? 'warning' : 'calibrate')
   }
 
   const record = useCallback((patch) => {
@@ -106,7 +107,7 @@ export default function HouseApp() {
           </h1>
           <p className="hs-subtitle">Some rules survive the reason they were made.</p>
           <div className="hs-actions">
-            <button type="button" className="hs-btn primary" onClick={() => begin(0)}>
+            <button type="button" className="hs-btn primary" onClick={() => begin(0, true)}>
               Start
             </button>
             {progress.reached > 0 && (
@@ -158,6 +159,8 @@ export default function HouseApp() {
           </button>
         </div>
       )}
+
+      {screen === 'warning' && <Disclaimer audio={services.audio} onDone={() => setScreen('calibrate')} />}
 
       {screen === 'calibrate' && (
         <Calibration

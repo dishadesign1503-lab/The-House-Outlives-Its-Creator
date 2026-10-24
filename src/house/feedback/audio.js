@@ -15,6 +15,7 @@
 //   shadow     beneath his spoken words: a low growl and a breath on each word, in a long reverb,
 //              panned to where his head lies — his voice seems to rise from under the house
 //   dream      a slow, dark drone while he dreams
+//   hush       a quiet whispering hiss under the opening warning, after Start
 // Every file's state is kept in assets (loaded, or why not), shown in the inspector.
 // Audio starts only after a tap (autoplay rules) and can be muted at any time.
 
@@ -321,6 +322,59 @@ export class Audio {
     d.g.gain.setTargetAtTime(0.0001, t, 1.2)
     for (const o of d.oscs) o.stop(t + 5)
     this.dreamPad = null
+  }
+
+  // ---------- the opening warning: a quiet "shhhh", air through a crack ----------
+
+  hushStart() {
+    if (!this.ctx || this.hush) return
+    const ctx = this.ctx
+    const t = ctx.currentTime
+    const s = ctx.createBufferSource()
+    s.buffer = this.noise
+    s.loop = true
+    const hp = ctx.createBiquadFilter()
+    hp.type = 'highpass'
+    hp.frequency.value = 1600
+    const bp = ctx.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.frequency.value = 3200
+    bp.Q.value = 0.7
+    // the hiss drifts in pitch and swells and ebbs, like a breath far off
+    const drift = ctx.createOscillator()
+    drift.frequency.value = 0.11
+    const driftDepth = ctx.createGain()
+    driftDepth.gain.value = 900
+    drift.connect(driftDepth).connect(bp.frequency)
+    const swell = ctx.createGain()
+    swell.gain.value = 0.6
+    const ebb = ctx.createOscillator()
+    ebb.frequency.value = 0.23
+    const ebbDepth = ctx.createGain()
+    ebbDepth.gain.value = 0.4
+    ebb.connect(ebbDepth).connect(swell.gain)
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0.0001, t)
+    g.gain.exponentialRampToValueAtTime(0.05, t + 1.8)
+    s.connect(hp).connect(bp).connect(swell).connect(g)
+    g.connect(this.master)
+    const w = ctx.createGain()
+    w.gain.value = 0.6
+    g.connect(w).connect(this.reverbIn())
+    s.start(t, Math.random())
+    drift.start(t)
+    ebb.start(t)
+    this.hush = { g, srcs: [s, drift, ebb] }
+  }
+
+  hushStop(fade = 1.2) {
+    const h = this.hush
+    if (!h || !this.ctx) return
+    const t = this.ctx.currentTime
+    h.g.gain.cancelScheduledValues(t)
+    h.g.gain.setTargetAtTime(0.0001, t, fade / 3)
+    for (const o of h.srcs) o.stop(t + fade * 2)
+    this.hush = null
   }
 
   // One of his lines, once (a line already sounding is cut off rather than overlapped).

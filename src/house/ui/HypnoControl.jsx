@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from 'react'
 // 3. STOP: the words are recognised on this device (listener.js) and checked: "You are …" + an
 //    object he can picture (objects.js, via the game). If they pass, the popup closes and the
 //    hypnosis begins; if not, it says what it heard and why, with RETRY.
-// The same popup has a typed fallback, for when there is no microphone or it misheard.
 
 const EXAMPLES = ['YOU ARE A LAMP STAND', 'YOU ARE A BOAT', 'YOU ARE A TREE', 'YOU ARE A STONE', 'YOU ARE A BRIDGE']
 
@@ -17,7 +16,6 @@ export default function HypnoControl({ services, engineRef, show, disabled }) {
   const [phase, setPhase] = useState('ready') // ready | loading | recording | recognizing | heard | error
   const [heard, setHeard] = useState('')
   const [error, setError] = useState('')
-  const [typed, setTyped] = useState('You are a ')
   const [level, setLevel] = useState(0)
   const [busy, setBusy] = useState(null) // null, or why he cannot be hypnotised now
   const closeTimer = useRef(null)
@@ -91,7 +89,7 @@ export default function HypnoControl({ services, engineRef, show, disabled }) {
       setPhase('recording')
     } catch {
       engineRef.current?.hypnoCancel()
-      setError(`${v.reason} Type the instruction below instead.`)
+      setError(v.reason)
       setPhase('error')
     }
   }
@@ -169,25 +167,7 @@ export default function HypnoControl({ services, engineRef, show, disabled }) {
                 <p>{error}</p>
               </div>
             )}
-            {!micOk && <p className="hs-sheet-status small">{v.reason} Type the instruction instead.</p>}
-
-            <form
-              className="hs-hypno-type"
-              onSubmit={(e) => {
-                e.preventDefault()
-                if (typed.trim().length > 8) submit(typed, { source: 'typed' })
-              }}
-            >
-              <label htmlFor="hs-typed" className="small hs-dim">
-                No microphone, or misheard? Type it instead:
-              </label>
-              <div className="hs-row-tight">
-                <input id="hs-typed" type="text" value={typed} maxLength={80} onChange={(e) => setTyped(e.target.value)} onKeyDown={(e) => e.stopPropagation()} disabled={phase === 'recording' || phase === 'recognizing'} />
-                <button type="submit" className="hs-btn tiny" disabled={phase === 'recording' || phase === 'recognizing' || typed.trim().length <= 8}>
-                  HYPNOTIZE
-                </button>
-              </div>
-            </form>
+            {!micOk && <p className="hs-sheet-status small">{v.reason}</p>}
 
             <p className="hs-sheet-note">The demon will interpret your suggestion and attempt to embody it through its sleeping posture. You cannot predict exactly how it will respond.</p>
           </div>
